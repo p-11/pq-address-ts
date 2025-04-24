@@ -24,7 +24,7 @@ export enum Version {
 }
 export function versionFromCode(code: number): Version {
   if (code === Version.V1) return Version.V1;
-  throw new Error(`Unknown version code: 0x${code.toString(16)}`);
+  throw new UnknownVersionError(code);
 }
 
 /** Hash Algorithms */
@@ -35,7 +35,7 @@ export enum HashAlgorithm {
 }
 export function hashAlgFromCode(code: number): HashAlgorithm {
   if (code === HashAlgorithm.SHA2_256) return HashAlgorithm.SHA2_256;
-  throw new Error(`Unknown hash algorithm code: 0x${code.toString(16)}`);
+  throw new UnknownHashAlgError(code);
 }
 export function digestLength(alg: HashAlgorithm): number {
   switch (alg) {
@@ -65,7 +65,7 @@ export function pubKeyTypeFromCode(code: number): PubKeyType {
     case PubKeyType.MLDSA87:
       return PubKeyType.MLDSA87;
     default:
-      throw new Error(`Unknown public key type code: 0x${code.toString(16)}`);
+      throw new UnknownPubKeyTypeError(code);
   }
 }
 
@@ -152,13 +152,8 @@ export function decodeAddress(addr: string): DecodedAddress {
   }
 
   const version = versionFromCode(data[0]);
-  if (version === undefined) throw new UnknownVersionError(data[0]);
-
   const pubkeyType = pubKeyTypeFromCode(data[1]);
-  if (pubkeyType === undefined) throw new UnknownPubKeyTypeError(data[1]);
-
   const hashAlg = hashAlgFromCode(data[2]);
-  if (hashAlg === undefined) throw new UnknownHashAlgError(data[2]);
 
   const hash = data.slice(3);
   const expected = digestLength(hashAlg);

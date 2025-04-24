@@ -27,14 +27,6 @@ export class InvalidLengthError extends EncodeError {
   }
 }
 
-// guards
-export function isBech32EncodeFailure(e: unknown): e is Bech32EncodeFailure {
-  return e instanceof Bech32EncodeFailure;
-}
-export function isInvalidLengthError(e: unknown): e is InvalidLengthError {
-  return e instanceof InvalidLengthError;
-}
-
 // —— Decode errors
 
 /** Base for all decode‐time errors */
@@ -105,28 +97,4 @@ export class InvalidHashLengthError extends DecodeError {
     super(`Invalid hash length: got ${got}, expected ${expected}`);
     this.name = 'InvalidHashLengthError';
   }
-}
-
-// guards
-export function isUnknownHrpError(e: unknown): e is UnknownHrpError {
-  return e instanceof UnknownHrpError;
-}
-export function isPayloadTooShortError(e: unknown): e is PayloadTooShortError {
-  return e instanceof PayloadTooShortError;
-}
-export function isUnknownVersionError(e: unknown): e is UnknownVersionError {
-  return e instanceof UnknownVersionError;
-}
-export function isUnknownPubKeyTypeError(
-  e: unknown
-): e is UnknownPubKeyTypeError {
-  return e instanceof UnknownPubKeyTypeError;
-}
-export function isUnknownHashAlgError(e: unknown): e is UnknownHashAlgError {
-  return e instanceof UnknownHashAlgError;
-}
-export function isInvalidHashLengthError(
-  e: unknown
-): e is InvalidHashLengthError {
-  return e instanceof InvalidHashLengthError;
 }
