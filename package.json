@@ -8,14 +8,17 @@
   "author": "Conor Deegan",
   "type": "commonjs",
   "scripts": {
+    "clean": "rimraf dist",
+    "build": "tsc -b",
+    "prepare": "npm run build",
+    "prepublishOnly": "npm test && npm run build",
     "test": "jest",
-    "build": "tsc",
-    "start": "node dist/index.js",
-    "dev": "ts-node src/index.ts",
+    "test:watch": "jest --watch",
     "lint:check": "eslint --config eslint.config.mjs \"./**/*.ts\"",
     "lint:fix": "eslint --config eslint.config.mjs \"./**/*.ts\" --fix",
-    "prettier:check": "prettier --config .prettierrc \"./**/*.+(js|json|ts|mjs)\" --check --ignore-unknown",
-    "prettier:fix": "prettier --config .prettierrc \"./**/*.+(js|json|ts|mjs)\" --write --ignore-unknown"
+    "prettier:check": "prettier --config .prettierrc \"./**/*.+(js|json|ts|mjs)\" --check",
+    "prettier:fix": "prettier --config .prettierrc \"./**/*.+(js|json|ts|mjs)\" --write",
+    "check": "npm run lint:check && npm run prettier:check && npm test"
   },
   "homepage": "https://github.com/p-11/pq-address-ts#readme",
   "bugs": {
@@ -35,5 +38,9 @@
     "ts-jest": "^29.3.2",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.31.0"
+  },
+  "dependencies": {
+    "bech32": "^2.0.0",
+    "js-sha256": "^0.11.0"
   }
 }
