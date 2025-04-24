@@ -29,6 +29,7 @@
     "url": "git+https://github.com/p-11/pq-address-ts.git"
   },
   "devDependencies": {
+    "@types/jest": "^29.5.14",
     "@typescript-eslint/eslint-plugin": "^8.31.0",
     "@typescript-eslint/parser": "^8.31.0",
     "eslint": "^9.25.1",

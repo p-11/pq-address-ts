@@ -1,5 +1,16 @@
 import { bech32m } from 'bech32';
 import { sha256 } from 'js-sha256';
+import {
+  InvalidLengthError,
+  Bech32EncodeFailure,
+  InvalidHashLengthError,
+  UnknownHrpError,
+  UnknownPubKeyTypeError,
+  UnknownVersionError,
+  UnknownHashAlgError,
+  PayloadTooShortError,
+  Bech32DecodeFailure
+} from './error';
 
 export const MAX_ADDRESS_LENGTH = 90;
 
@@ -74,19 +85,6 @@ export function networkFromHrp(hrp: string): Network {
   throw new Error(`Unknown HRP: ${hrp}`);
 }
 
-//——— Error Types
-
-export class EncodeError extends Error {}
-export class DecodeError extends Error {}
-
-export class InvalidLengthError extends EncodeError {
-  constructor(public got: number) {
-    super(
-      `A Bech32 string is at most ${MAX_ADDRESS_LENGTH} characters long: got ${got}`
-    );
-  }
-}
-
 //——— Payload interface
 
 export interface AddressParams {
@@ -106,10 +104,8 @@ export interface DecodedAddress {
 }
 
 //——— Encode / Decode
-
 export function encodeAddress(params: AddressParams): string {
   const digest = hashDigest(params.hashAlg, params.pubkeyBytes);
-
   const payload = new Uint8Array(3 + digest.length);
   payload[0] = params.version;
   payload[1] = params.pubkeyType;
@@ -118,31 +114,56 @@ export function encodeAddress(params: AddressParams): string {
 
   const words = bech32m.toWords(payload);
   const hrp = hrpOf(params.network);
-  const encoded = bech32m.encode(hrp, words);
+
+  let encoded: string;
+  try {
+    encoded = bech32m.encode(hrp, words);
+  } catch (err) {
+    throw new Bech32EncodeFailure(err as Error);
+  }
 
   if (encoded.length > MAX_ADDRESS_LENGTH) {
-    throw new InvalidLengthError(encoded.length);
+    throw new InvalidLengthError(encoded.length, MAX_ADDRESS_LENGTH);
   }
   return encoded;
 }
 
 export function decodeAddress(addr: string): DecodedAddress {
-  const { prefix: hrp, words } = bech32m.decode(addr);
-  const network = networkFromHrp(hrp);
-  const data = bech32m.fromWords(words);
+  let decoded: { prefix: string; words: number[] };
+  try {
+    decoded = bech32m.decode(addr);
+  } catch (err) {
+    throw new Bech32DecodeFailure(err as Error);
+  }
 
-  if (data.length < 3) throw new DecodeError('Payload too short');
+  const { prefix: hrp, words } = decoded;
+
+  const network = (() => {
+    try {
+      return networkFromHrp(hrp);
+    } catch {
+      throw new UnknownHrpError(hrp);
+    }
+  })();
+
+  const data = bech32m.fromWords(words);
+  if (data.length < 3) {
+    throw new PayloadTooShortError(data.length, 3);
+  }
 
   const version = versionFromCode(data[0]);
-  const pubkeyType = pubKeyTypeFromCode(data[1]);
-  const hashAlg = hashAlgFromCode(data[2]);
-  const hash = data.slice(3);
+  if (version === undefined) throw new UnknownVersionError(data[0]);
 
+  const pubkeyType = pubKeyTypeFromCode(data[1]);
+  if (pubkeyType === undefined) throw new UnknownPubKeyTypeError(data[1]);
+
+  const hashAlg = hashAlgFromCode(data[2]);
+  if (hashAlg === undefined) throw new UnknownHashAlgError(data[2]);
+
+  const hash = data.slice(3);
   const expected = digestLength(hashAlg);
   if (hash.length !== expected) {
-    throw new DecodeError(
-      `Invalid hash length: got ${hash.length}, expected ${expected}`
-    );
+    throw new InvalidHashLengthError(hash.length, expected);
   }
 
   return {
@@ -154,21 +175,15 @@ export function decodeAddress(addr: string): DecodedAddress {
   };
 }
 
-// TODO: REMOVE TEMP!
-const params = {
-  network: Network.MAINNET,
-  version: Version.V1,
-  pubkeyType: PubKeyType.MLDSA65,
-  hashAlg: HashAlgorithm.SHA2_256,
-  pubkeyBytes: new TextEncoder().encode('hello world!')
+// export errors
+export {
+  InvalidLengthError,
+  Bech32EncodeFailure,
+  InvalidHashLengthError,
+  UnknownHrpError,
+  UnknownPubKeyTypeError,
+  UnknownVersionError,
+  UnknownHashAlgError,
+  PayloadTooShortError,
+  Bech32DecodeFailure
 };
-
-const addr = encodeAddress(params);
-console.log('Encoded:', addr);
-
-try {
-  const decoded = decodeAddress(addr);
-  console.log('Decoded:', decoded);
-} catch (err) {
-  console.error('Error decoding:', err);
-}
