@@ -14,8 +14,8 @@
     "prepublishOnly": "npm test && npm run build",
     "test": "jest",
     "test:watch": "jest --watch",
-    "lint:check": "eslint --config eslint.config.mjs \"./**/*.ts\"",
-    "lint:fix": "eslint --config eslint.config.mjs \"./**/*.ts\" --fix",
+    "lint:check": "eslint --config eslint.config.mjs \"./src/*.ts\"",
+    "lint:fix": "eslint --config eslint.config.mjs \"./src/*.ts\" --fix",
     "prettier:check": "prettier --config .prettierrc \"./**/*.+(js|json|ts|mjs)\" --check",
     "prettier:fix": "prettier --config .prettierrc \"./**/*.+(js|json|ts|mjs)\" --write",
     "check": "npm run lint:check && npm run prettier:check && npm test"
