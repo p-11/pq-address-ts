@@ -112,37 +112,10 @@ console.log(pq_addr);
 
 ## Errors
 
-Encoding errors:
-
-```js
-import { InvalidLengthError, Bech32EncodeFailure } from 'pq-address-ts';
-
-try {
-  const params = {
-    network: Network.MAINNET,
-    version: Version.V1,
-    pubkeyType: PubKeyType.MLDSA65,
-    hashAlg: HashAlgorithm.SHA2_256,
-    pubkeyBytes: textEncoder.encode('hello')
-  };
-
-  const pq_addr = encodeAddress(params);
-  console.log(pq_addr);
-} catch (e) {
-  if (e instanceof Bech32EncodeFailure) {
-    console.error('Bech32 encoding failed:', e);
-  } else if (e instanceof InvalidLengthError) {
-    console.error('Invalid length:', e);
-  } else {
-    console.error('Unexpected error:', e);
-  }
-}
-```
-
-Decoding errors:
-
 ```js
 import {
+  Bech32EncodeFailure,
+  InvalidLengthError,
   InvalidHashLengthError,
   UnknownHrpError,
   UnknownPubKeyTypeError,
@@ -152,25 +125,47 @@ import {
   Bech32DecodeFailure
 } from 'pq-address-ts';
 
+// Example params...
+const params = {
+  network: Network.MAINNET,
+  version: Version.V1,
+  pubkeyType: PubKeyType.MLDSA65,
+  hashAlg: HashAlgorithm.SHA2_256,
+  pubkeyBytes: new TextEncoder().encode('hello')
+};
+
 try {
-  const decoded = decodeAddress(pq_addr);
-  console.log(pq_addr);
-} catch (e) {
-  if (e instanceof Bech32DecodeFailure) {
-    console.error('Bech32 decoding failed:', e);
+  // ENCODE
+  const addr = encodeAddress(params);
+  console.log('Address:', addr);
+
+  // DECODE
+  const decoded = decodeAddress(addr);
+  console.log('Decoded:', decoded);
+} catch (e: unknown) {
+  // Handle encode errors
+  if (e instanceof Bech32EncodeFailure) {
+    console.error('Bech32 encode failed:', e.original.message);
+  } else if (e instanceof InvalidLengthError) {
+    console.error(`Bech32m address exceeds safe length: got ${e.got}, max ${e.max}`);
+  }
+  // Handle decode errors
+  else if (e instanceof Bech32DecodeFailure) {
+    console.error('Bad address format or checksum:', e.error.message);
   } else if (e instanceof UnknownHrpError) {
-    console.error('Unknown HRP:', e);
+    console.error('Unknown network prefix (HRP):', e.hrp);
   } else if (e instanceof PayloadTooShortError) {
-    console.error('Payload too short:', e);
+    console.error(`Payload too short: got ${e.got}, need ≥ ${e.need}`);
   } else if (e instanceof UnknownVersionError) {
-    console.error('Unknown version:', e);
+    console.error('Unknown version byte:', e.code);
   } else if (e instanceof UnknownPubKeyTypeError) {
-    console.error('Unknown public key type:', e);
+    console.error('Unknown pubkey type byte:', e.code);
   } else if (e instanceof UnknownHashAlgError) {
-    console.error('Unknown hash algorithm:', e);
+    console.error('Unknown hash algorithm byte:', e.code);
   } else if (e instanceof InvalidHashLengthError) {
-    console.error('Invalid hash length:', e);
+    console.error(`Hash length mismatch: got ${e.got}, expected ${e.expected}`);
   } else {
+    // Fallback for any unexpected error
     console.error('Unexpected error:', e);
   }
 }
