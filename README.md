@@ -11,7 +11,7 @@ Sharing a post‑quantum public key needs:
 3. A readable, typo‑resistant **encoding**.
 4. A clear **network flag** (production vs development).
 
-`pq‑address‑ts` provides all four. It lets you generate and parse addresses for any public‑key type (ML‑DSA, SLH‑DSA, etc.) and any hash algorithm (SHA‑256, SHA3-256, …), while guaranteeing future‑proof safety.
+`pq‑address‑ts` provides all four. It lets you generate and parse addresses for any public‑key type (ML‑DSA, SLH‑DSA, etc.), while guaranteeing future‑proof safety.
 
 ## Design & Justification
 
@@ -26,8 +26,7 @@ Sharing a post‑quantum public key needs:
 
 - **Disjoint byte ranges**
 
-  - Version codes in `0x00–0x0F` (up to 32 versions).
-  - HashAlgorithm codes in `0x20–0x3F` (up to 32 hash functions).
+  - Version codes in `0x00–0x3F` (up to 64 versions).
   - PubKeyType codes in `0x40–0xFF` (up to 192 public key types).
   - Any byte‑swap or mis‑read triggers a clear “unknown code” error.
 
@@ -37,7 +36,7 @@ Sharing a post‑quantum public key needs:
 
 - **Extendable**
 
-  - Add new `PubKeyType` or `HashAlgorithm` variants without breaking old addresses.
+  - Add new `PubKeyType` variants without breaking old addresses.
 
 ## Anatomy of a PQ address
 
@@ -57,8 +56,7 @@ Address example: `yp1qpqzqagfuk76p3mz62av07gdwk94kgnrlgque0z592678hck80sgum9fdgf
    - The payload bytes:
      1. Version
      2. PubKeyType
-     3. HashAlg
-     4. Raw pubkey hash digest
+     3. Raw pubkey hash digest
    - Converted into 5-bit words and then into Bech32 characters.
 
 4. **Checksum**
@@ -66,6 +64,12 @@ Address example: `yp1qpqzqagfuk76p3mz62av07gdwk94kgnrlgque0z592678hck80sgum9fdgf
    - Catches typos and bit-errors.
 
 Note: A Bech32 string is at most 90 characters long [BIP-173]
+
+## A Note on Hash Algorithms
+
+The default hash function for `pq-address-ts` is SHA-256.
+256 bit hash functions are currently considered secure against Grover's attack.
+Even if the preimage is recovered, it only reveals a PQ secure public key and thus Shor's is not applicable.
 
 ## Quickstart
 
@@ -84,7 +88,6 @@ import {
   Network,
   Version
   PubKeyType,
-  HashAlgorithm,
 } from 'pq-address-ts';
 ```
 
@@ -95,7 +98,6 @@ const params = {
   network: Network.MAINNET,
   version: Version.V1,
   pubkeyType: PubKeyType.MLDSA65,
-  hashAlg: HashAlgorithm.SHA2_256,
   pubkeyBytes: textEncoder.encode('hello')
 };
 
@@ -120,7 +122,6 @@ import {
   UnknownHrpError,
   UnknownPubKeyTypeError,
   UnknownVersionError,
-  UnknownHashAlgError,
   PayloadTooShortError,
   Bech32DecodeFailure
 } from 'pq-address-ts';
@@ -130,7 +131,6 @@ const params = {
   network: Network.MAINNET,
   version: Version.V1,
   pubkeyType: PubKeyType.MLDSA65,
-  hashAlg: HashAlgorithm.SHA2_256,
   pubkeyBytes: new TextEncoder().encode('hello')
 };
 
@@ -160,8 +160,6 @@ try {
     console.error('Unknown version byte:', e.code);
   } else if (e instanceof UnknownPubKeyTypeError) {
     console.error('Unknown pubkey type byte:', e.code);
-  } else if (e instanceof UnknownHashAlgError) {
-    console.error('Unknown hash algorithm byte:', e.code);
   } else if (e instanceof InvalidHashLengthError) {
     console.error(`Hash length mismatch: got ${e.got}, expected ${e.expected}`);
   } else {

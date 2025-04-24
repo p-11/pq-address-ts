@@ -7,7 +7,6 @@ import {
   UnknownHrpError,
   UnknownPubKeyTypeError,
   UnknownVersionError,
-  UnknownHashAlgError,
   PayloadTooShortError,
   Bech32DecodeFailure
 } from './error';
@@ -17,7 +16,7 @@ export const MAX_ADDRESS_LENGTH = 90;
 //——— Enums and Ranges
 
 /** Versioning */
-/** 0x00..=0x1F (32 slots) */
+/** 0x00..=0x3F (64 slots) */
 export enum Version {
   // eslint-disable-next-line no-unused-vars
   V1 = 0x00
@@ -27,43 +26,20 @@ export function versionFromCode(code: number): Version {
   throw new UnknownVersionError(code);
 }
 
-/** Hash Algorithms */
-/** 0x20..=0x3F (32 slots) */
-export enum HashAlgorithm {
-  // eslint-disable-next-line no-unused-vars
-  SHA2_256 = 0x20
-}
-export function hashAlgFromCode(code: number): HashAlgorithm {
-  if (code === HashAlgorithm.SHA2_256) return HashAlgorithm.SHA2_256;
-  throw new UnknownHashAlgError(code);
-}
-export function digestLength(alg: HashAlgorithm): number {
-  switch (alg) {
-    case HashAlgorithm.SHA2_256:
-      return 32;
-  }
-}
-export function hashDigest(alg: HashAlgorithm, data: Uint8Array): Uint8Array {
-  switch (alg) {
-    case HashAlgorithm.SHA2_256:
-      return Uint8Array.from(Buffer.from(sha256.arrayBuffer(data)));
-  }
-}
-
 /** Public Key Algorithms */
 /** 0x40..=0xFF (192 slots) */
 export enum PubKeyType {
   // eslint-disable-next-line no-unused-vars
   MLDSA65 = 0x40,
   // eslint-disable-next-line no-unused-vars
-  MLDSA87 = 0x41
+  SLH_DSA_SHA2_256S = 0x41
 }
 export function pubKeyTypeFromCode(code: number): PubKeyType {
   switch (code) {
     case PubKeyType.MLDSA65:
       return PubKeyType.MLDSA65;
-    case PubKeyType.MLDSA87:
-      return PubKeyType.MLDSA87;
+    case PubKeyType.SLH_DSA_SHA2_256S:
+      return PubKeyType.SLH_DSA_SHA2_256S;
     default:
       throw new UnknownPubKeyTypeError(code);
   }
@@ -85,13 +61,23 @@ export function networkFromHrp(hrp: string): Network {
   throw new Error(`Unknown HRP: ${hrp}`);
 }
 
+/** Hasher */
+/// The default hash function for pq-address: SHA-256.
+///
+/// 256 bit hash function is currently considered secure against Grover's attack.
+/// Even if the preimage is recovered, it only reveals a PQ secure public key and thus Shor's is not applicable.
+export const hasher = {
+  DIGEST_LENGTH: 32,
+  digest: (data: Uint8Array) =>
+    Uint8Array.from(Buffer.from(sha256.arrayBuffer(data)))
+};
+
 //——— Payload interface
 
 export interface AddressParams {
   network: Network;
   version: Version;
   pubkeyType: PubKeyType;
-  hashAlg: HashAlgorithm;
   pubkeyBytes: Uint8Array;
 }
 
@@ -99,18 +85,16 @@ export interface DecodedAddress {
   network: Network;
   version: string;
   pubkeyType: string;
-  hashAlg: string;
   pubkeyHash: Uint8Array;
 }
 
 //——— Encode / Decode
 export function encodeAddress(params: AddressParams): string {
-  const digest = hashDigest(params.hashAlg, params.pubkeyBytes);
-  const payload = new Uint8Array(3 + digest.length);
+  const digest = hasher.digest(params.pubkeyBytes);
+  const payload = new Uint8Array(2 + digest.length);
   payload[0] = params.version;
   payload[1] = params.pubkeyType;
-  payload[2] = params.hashAlg;
-  payload.set(digest, 3);
+  payload.set(digest, 2);
 
   const words = bech32m.toWords(payload);
   const hrp = hrpOf(params.network);
@@ -147,16 +131,15 @@ export function decodeAddress(addr: string): DecodedAddress {
   })();
 
   const data = bech32m.fromWords(words);
-  if (data.length < 3) {
-    throw new PayloadTooShortError(data.length, 3);
+  if (data.length < 2) {
+    throw new PayloadTooShortError(data.length, 2);
   }
 
   const version = versionFromCode(data[0]);
   const pubkeyType = pubKeyTypeFromCode(data[1]);
-  const hashAlg = hashAlgFromCode(data[2]);
 
-  const hash = data.slice(3);
-  const expected = digestLength(hashAlg);
+  const hash = data.slice(2);
+  const expected = hasher.DIGEST_LENGTH;
   if (hash.length !== expected) {
     throw new InvalidHashLengthError(hash.length, expected);
   }
@@ -165,7 +148,6 @@ export function decodeAddress(addr: string): DecodedAddress {
     network,
     version: Version[version],
     pubkeyType: PubKeyType[pubkeyType],
-    hashAlg: HashAlgorithm[hashAlg],
     pubkeyHash: Uint8Array.from(hash)
   };
 }
@@ -178,7 +160,6 @@ export {
   UnknownHrpError,
   UnknownPubKeyTypeError,
   UnknownVersionError,
-  UnknownHashAlgError,
   PayloadTooShortError,
   Bech32DecodeFailure
 };

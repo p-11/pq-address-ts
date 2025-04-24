@@ -5,9 +5,8 @@ import {
   decodeAddress,
   Version,
   Network,
-  HashAlgorithm,
   PubKeyType,
-  hashDigest
+  hasher
 } from '../src/index';
 
 describe('PQ Address roundtrip', () => {
@@ -19,7 +18,6 @@ describe('PQ Address roundtrip', () => {
       network: Network.MAINNET,
       version: Version.V1,
       pubkeyType: PubKeyType.MLDSA65,
-      hashAlg: HashAlgorithm.SHA2_256,
       pubkeyBytes: textEncoder.encode('hello')
     };
 
@@ -30,19 +28,15 @@ describe('PQ Address roundtrip', () => {
     expect(decoded.network).toBe('mainnet');
     expect(decoded.version).toBe('V1');
     expect(decoded.pubkeyType).toBe('MLDSA65');
-    expect(decoded.hashAlg).toBe('SHA2_256');
 
-    expect(decoded.pubkeyHash).toEqual(
-      hashDigest(params.hashAlg, params.pubkeyBytes)
-    );
+    expect(decoded.pubkeyHash).toEqual(hasher.digest(params.pubkeyBytes));
   });
 
-  it('testnet SHA256 MLDSA87', () => {
+  it('testnet SHA256 SLH_DSA_SHA2_256S', () => {
     const params = {
       network: Network.TESTNET,
       version: Version.V1,
-      pubkeyType: PubKeyType.MLDSA87,
-      hashAlg: HashAlgorithm.SHA2_256,
+      pubkeyType: PubKeyType.SLH_DSA_SHA2_256S,
       pubkeyBytes: textEncoder.encode('world')
     };
 
@@ -52,11 +46,8 @@ describe('PQ Address roundtrip', () => {
     const decoded = decodeAddress(addr);
     expect(decoded.network).toBe('testnet');
     expect(decoded.version).toBe('V1');
-    expect(decoded.pubkeyType).toBe('MLDSA87');
-    expect(decoded.hashAlg).toBe('SHA2_256');
+    expect(decoded.pubkeyType).toBe('SLH_DSA_SHA2_256S');
 
-    expect(decoded.pubkeyHash).toEqual(
-      hashDigest(params.hashAlg, params.pubkeyBytes)
-    );
+    expect(decoded.pubkeyHash).toEqual(hasher.digest(params.pubkeyBytes));
   });
 });

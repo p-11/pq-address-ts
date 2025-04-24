@@ -80,14 +80,6 @@ export class UnknownPubKeyTypeError extends DecodeError {
   }
 }
 
-/** HashAlg byte was unrecognized */
-export class UnknownHashAlgError extends DecodeError {
-  constructor(public code: number) {
-    super(`Unknown hash algorithm code: 0x${code.toString(16)}`);
-    this.name = 'UnknownHashAlgError';
-  }
-}
-
 /** Digest length mismatch */
 export class InvalidHashLengthError extends DecodeError {
   constructor(
