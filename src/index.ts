@@ -53,7 +53,7 @@ export enum Network {
   TESTNET = 'testnet'
 }
 export function hrpOf(net: Network): string {
-  return net === 'mainnet' ? 'yp' : 'rh';
+  return net === Network.MAINNET ? 'yp' : 'rh';
 }
 export function networkFromHrp(hrp: string): Network {
   if (hrp === 'yp') return Network.MAINNET;
