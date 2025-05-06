@@ -30,6 +30,8 @@ Sharing a post‑quantum public key needs:
   - PubKeyType codes in `0x40–0xFF` (up to 192 public key types).
   - Any byte‑swap or mis‑read triggers a clear “unknown code” error.
 
+  By carving out non-overlapping slots for versions (0x00–0x3F) and public key types (0x40–0xFF), parsing becomes trivial—and any stray or swapped byte instantly flags itself as an “unknown code,” preventing silent failures.
+
 - **HRP flag**
 
   - `"yp"` for production/mainnet, `"rh"` for development/testnet.
@@ -63,11 +65,13 @@ Address example: `yp1qpqzqagfuk76p3mz62av07gdwk94kgnrlgque0z592678hck80sgum9fdgf
    - 6 Bech32 characters (BIP-350)
    - Catches typos and bit-errors.
 
+PQ address length is 64 characters.
+
 Note: A Bech32 string is at most 90 characters long [BIP-173]
 
 ## A Note on Hash Algorithms
 
-The default hash function for `pq-address-ts` is SHA-256.
+The default hash function for `pq-address` is SHA-256.
 256 bit hash functions are currently considered secure against Grover's attack.
 Even if the preimage is recovered, it only reveals a PQ secure public key and thus Shor's is not applicable.
 
@@ -76,10 +80,10 @@ Even if the preimage is recovered, it only reveals a PQ secure public key and th
 Add to your `package.json`:
 
 ```bash
-npm install pq-address-ts
+npm install pq-address
 ```
 
-Import `pq_address_ts`
+Import `pq-address`
 
 ```js
 import {
@@ -88,7 +92,7 @@ import {
   Network,
   Version
   PubKeyType,
-} from 'pq-address-ts';
+} from 'pq-address';
 ```
 
 Encoding
@@ -97,8 +101,8 @@ Encoding
 const params = {
   network: Network.MAINNET,
   version: Version.V1,
-  pubkeyType: PubKeyType.MLDSA65,
-  pubkeyBytes: textEncoder.encode('hello')
+  pubkeyType: PubKeyType.MLDSA44,
+  pubkeyBytes: <PUB_KEY_BYTES>,
 };
 
 const pq_addr = encodeAddress(params);
@@ -124,14 +128,14 @@ import {
   UnknownVersionError,
   PayloadTooShortError,
   Bech32DecodeFailure
-} from 'pq-address-ts';
+} from 'pq-address';
 
 // Example params...
 const params = {
   network: Network.MAINNET,
   version: Version.V1,
-  pubkeyType: PubKeyType.MLDSA65,
-  pubkeyBytes: new TextEncoder().encode('hello')
+  pubkeyType: PubKeyType.MLDSA44,
+  pubkeyBytes: <PUB_KEY_BYTES>,
 };
 
 try {

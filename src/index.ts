@@ -11,7 +11,9 @@ import {
   Bech32DecodeFailure
 } from './error';
 
-export const MAX_ADDRESS_LENGTH = 90;
+// A Bech32 string is at most 90 characters long [BIP-173]
+// PQ address length is 64 characters.
+export const ADDRESS_LENGTH = 64;
 
 //——— Enums and Ranges
 
@@ -30,16 +32,12 @@ export function versionFromCode(code: number): Version {
 /** 0x40..=0xFF (192 slots) */
 export enum PubKeyType {
   // eslint-disable-next-line no-unused-vars
-  MLDSA65 = 0x40,
-  // eslint-disable-next-line no-unused-vars
-  SLH_DSA_SHA2_256S = 0x41
+  MLDSA44 = 0x40
 }
 export function pubKeyTypeFromCode(code: number): PubKeyType {
   switch (code) {
-    case PubKeyType.MLDSA65:
-      return PubKeyType.MLDSA65;
-    case PubKeyType.SLH_DSA_SHA2_256S:
-      return PubKeyType.SLH_DSA_SHA2_256S;
+    case PubKeyType.MLDSA44:
+      return PubKeyType.MLDSA44;
     default:
       throw new UnknownPubKeyTypeError(code);
   }
@@ -106,8 +104,8 @@ export function encodeAddress(params: AddressParams): string {
     throw new Bech32EncodeFailure(err as Error);
   }
 
-  if (encoded.length > MAX_ADDRESS_LENGTH) {
-    throw new InvalidLengthError(encoded.length, MAX_ADDRESS_LENGTH);
+  if (encoded.length !== ADDRESS_LENGTH) {
+    throw new InvalidLengthError(encoded.length, ADDRESS_LENGTH);
   }
   return encoded;
 }

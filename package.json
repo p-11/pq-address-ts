@@ -1,5 +1,5 @@
 {
-  "name": "pq-address-ts",
+  "name": "pq-address",
   "version": "1.0.0",
   "description": "A Typescript library for encoding and decoding post‑quantum public keys into human‑friendly Bech32m addresses.",
   "main": "dist/index.js",

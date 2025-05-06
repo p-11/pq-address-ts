@@ -1,4 +1,4 @@
-# Contributing to pq-address-ts
+# Contributing to pq-address
 
 Thanks for your interest! We welcome pull requests, issues, and feedback. Here’s how you can help.
 

@@ -13,12 +13,12 @@ describe('PQ Address roundtrip', () => {
   // Now you can use this TextEncoder
   const textEncoder = new TextEncoder();
 
-  it('mainnet SHA256 MLDSA65', () => {
+  it('mainnet SHA256 MLDSA44', () => {
     const params = {
       network: Network.MAINNET,
       version: Version.V1,
-      pubkeyType: PubKeyType.MLDSA65,
-      pubkeyBytes: textEncoder.encode('hello')
+      pubkeyType: PubKeyType.MLDSA44,
+      pubkeyBytes: textEncoder.encode('hello world!')
     };
 
     const addr = encodeAddress(params);
@@ -27,16 +27,16 @@ describe('PQ Address roundtrip', () => {
     const decoded = decodeAddress(addr);
     expect(decoded.network).toBe('mainnet');
     expect(decoded.version).toBe('V1');
-    expect(decoded.pubkeyType).toBe('MLDSA65');
+    expect(decoded.pubkeyType).toBe('MLDSA44');
 
     expect(decoded.pubkeyHash).toEqual(hasher.digest(params.pubkeyBytes));
   });
 
-  it('testnet SHA256 SLH_DSA_SHA2_256S', () => {
+  it('testnet SHA256 ML-DSA 44', () => {
     const params = {
       network: Network.TESTNET,
       version: Version.V1,
-      pubkeyType: PubKeyType.SLH_DSA_SHA2_256S,
+      pubkeyType: PubKeyType.MLDSA44,
       pubkeyBytes: textEncoder.encode('world')
     };
 
@@ -46,7 +46,7 @@ describe('PQ Address roundtrip', () => {
     const decoded = decodeAddress(addr);
     expect(decoded.network).toBe('testnet');
     expect(decoded.version).toBe('V1');
-    expect(decoded.pubkeyType).toBe('SLH_DSA_SHA2_256S');
+    expect(decoded.pubkeyType).toBe('MLDSA44');
 
     expect(decoded.pubkeyHash).toEqual(hasher.digest(params.pubkeyBytes));
   });
