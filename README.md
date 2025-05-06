@@ -1,4 +1,4 @@
-# pq‑address‑ts
+# pq‑address
 
 A TypeScript library for encoding and decoding post‑quantum public keys into human‑friendly Bech32m addresses.
 
@@ -11,7 +11,7 @@ Sharing a post‑quantum public key needs:
 3. A readable, typo‑resistant **encoding**.
 4. A clear **network flag** (production vs development).
 
-`pq‑address‑ts` provides all four. It lets you generate and parse addresses for any public‑key type (ML‑DSA, SLH‑DSA, etc.), while guaranteeing future‑proof safety.
+`pq‑address` provides all four. It lets you generate and parse addresses for any public‑key type (ML‑DSA, SLH‑DSA, etc.), while guaranteeing future‑proof safety.
 
 ## Design & Justification
 
@@ -101,7 +101,7 @@ Encoding
 const params = {
   network: Network.MAINNET,
   version: Version.V1,
-  pubkeyType: PubKeyType.MLDSA44,
+  pubkeyType: PubKeyType.MlDsa44,
   pubkeyBytes: <PUB_KEY_BYTES>,
 };
 
@@ -135,7 +135,7 @@ import {
 const params = {
   network: Network.MAINNET,
   version: Version.V1,
-  pubkeyType: PubKeyType.MLDSA44,
+  pubkeyType: PubKeyType.MlDsa44,
   pubkeyBytes: <PUB_KEY_BYTES>,
 };
 
