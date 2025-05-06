@@ -123,6 +123,7 @@ import {
   Bech32EncodeFailure,
   InvalidLengthError,
   InvalidHashLengthError,
+  InvalidPubkeyLengthError,
   UnknownHrpError,
   UnknownPubKeyTypeError,
   UnknownVersionError,
@@ -152,6 +153,8 @@ try {
     console.error('Bech32 encode failed:', e.original.message);
   } else if (e instanceof InvalidLengthError) {
     console.error(`Bech32m address exceeds safe length: got ${e.got}, max ${e.max}`);
+  } else if (e instanceof InvalidPubKeyLengthError) {
+    console.error(`Pubkey length mismatch: got ${e.got}, expected ${e.expected}`);
   }
   // Handle decode errors
   else if (e instanceof Bech32DecodeFailure) {

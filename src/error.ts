@@ -27,6 +27,16 @@ export class InvalidLengthError extends EncodeError {
   }
 }
 
+export class InvalidPubkeyLengthError extends EncodeError {
+  constructor(
+    public got: number,
+    public expected: number
+  ) {
+    super(`Pubkey length mismatch: got ${got}, expected ${expected}`);
+    this.name = 'InvalidPubkeyLengthError';
+  }
+}
+
 // —— Decode errors
 
 /** Base for all decode‐time errors */

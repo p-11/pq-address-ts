@@ -3,6 +3,7 @@ import { sha256 } from 'js-sha256';
 import {
   InvalidLengthError,
   Bech32EncodeFailure,
+  InvalidPubkeyLengthError,
   InvalidHashLengthError,
   UnknownHrpError,
   UnknownPubKeyTypeError,
@@ -32,30 +33,39 @@ export function versionFromCode(code: number): Version {
 /** 0x40..=0xFF (192 slots) */
 export enum PubKeyType {
   // eslint-disable-next-line no-unused-vars
-  MLDSA44 = 0x40
+  MlDsa44 = 0x40
 }
 export function pubKeyTypeFromCode(code: number): PubKeyType {
   switch (code) {
-    case PubKeyType.MLDSA44:
-      return PubKeyType.MLDSA44;
+    case PubKeyType.MlDsa44:
+      return PubKeyType.MlDsa44;
     default:
       throw new UnknownPubKeyTypeError(code);
+  }
+}
+
+function getPubkeyLength(type: PubKeyType): number {
+  switch (type) {
+    case PubKeyType.MlDsa44:
+      return 1312;
+    default:
+      throw new UnknownPubKeyTypeError(type);
   }
 }
 
 /** Network & HRP mapping */
 export enum Network {
   // eslint-disable-next-line no-unused-vars
-  MAINNET = 'mainnet',
+  Mainnet = 'mainnet',
   // eslint-disable-next-line no-unused-vars
-  TESTNET = 'testnet'
+  Testnet = 'testnet'
 }
 export function hrpOf(net: Network): string {
-  return net === Network.MAINNET ? 'yp' : 'rh';
+  return net === Network.Mainnet ? 'yp' : 'rh';
 }
 export function networkFromHrp(hrp: string): Network {
-  if (hrp === 'yp') return Network.MAINNET;
-  if (hrp === 'rh') return Network.TESTNET;
+  if (hrp === 'yp') return Network.Mainnet;
+  if (hrp === 'rh') return Network.Testnet;
   throw new Error(`Unknown HRP: ${hrp}`);
 }
 
@@ -88,6 +98,13 @@ export interface DecodedAddress {
 
 //——— Encode / Decode
 export function encodeAddress(params: AddressParams): string {
+  const expectedPubkeyLength = getPubkeyLength(params.pubkeyType);
+  if (params.pubkeyBytes.length !== expectedPubkeyLength) {
+    throw new InvalidPubkeyLengthError(
+      params.pubkeyBytes.length,
+      expectedPubkeyLength
+    );
+  }
   const digest = hasher.digest(params.pubkeyBytes);
   const payload = new Uint8Array(2 + digest.length);
   payload[0] = params.version;
