@@ -1,0 +1,47 @@
+{
+  "name": "@project-eleven/pq-address",
+  "version": "0.1.0",
+  "description": "A Typescript library for encoding and decoding post‑quantum public keys into human‑friendly Bech32m addresses.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "license": "MIT",
+  "author": "Conor Deegan",
+  "type": "commonjs",
+  "scripts": {
+    "clean": "rimraf dist",
+    "build": "tsc -b",
+    "prepare": "npm run build",
+    "prepublishOnly": "npm test && npm run build",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "lint:check": "eslint --config eslint.config.mjs \"./src/*.ts\"",
+    "lint:fix": "eslint --config eslint.config.mjs \"./src/*.ts\" --fix",
+    "prettier:check": "prettier --config .prettierrc \"./**/*.+(js|json|ts|mjs)\" --check",
+    "prettier:fix": "prettier --config .prettierrc \"./**/*.+(js|json|ts|mjs)\" --write",
+    "check": "npm run lint:check && npm run prettier:check && npm test"
+  },
+  "homepage": "https://github.com/p-11/pq-address-ts#readme",
+  "bugs": {
+    "url": "https://github.com/p-11/pq-address-ts/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/p-11/pq-address-ts.git"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.14",
+    "@typescript-eslint/eslint-plugin": "^8.31.0",
+    "@typescript-eslint/parser": "^8.31.0",
+    "eslint": "^9.25.1",
+    "eslint-config-prettier": "^10.1.2",
+    "eslint-plugin-prettier": "^5.2.6",
+    "prettier": "^3.5.3",
+    "ts-jest": "^29.3.2",
+    "typescript": "^5.8.3",
+    "typescript-eslint": "^8.31.0"
+  },
+  "dependencies": {
+    "bech32": "^2.0.0",
+    "js-sha256": "^0.11.0"
+  }
+}
