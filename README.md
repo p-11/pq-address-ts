@@ -1,4 +1,4 @@
-# pq‑address
+# PQ Address TS
 
 A TypeScript library for encoding and decoding post‑quantum public keys into human‑friendly Bech32m addresses.
 
@@ -71,7 +71,7 @@ Note: A Bech32 string is at most 90 characters long [BIP-173]
 
 ## A Note on Hash Algorithms
 
-The default hash function for `pq-address` is SHA-256.
+The default hash function for `@project-eleven/pq-address` is SHA-256.
 256 bit hash functions are currently considered secure against Grover's attack.
 Even if the preimage is recovered, it only reveals a PQ secure public key and thus Shor's is not applicable.
 
@@ -80,10 +80,10 @@ Even if the preimage is recovered, it only reveals a PQ secure public key and th
 Add to your `package.json`:
 
 ```bash
-npm install pq-address
+npm install @project-eleven/pq-address
 ```
 
-Import `pq-address`
+Import `@project-eleven/pq-address`
 
 ```js
 import {
@@ -92,7 +92,7 @@ import {
   Network,
   Version
   PubKeyType,
-} from 'pq-address';
+} from '@project-eleven/pq-address';
 ```
 
 Encoding
@@ -129,7 +129,7 @@ import {
   UnknownVersionError,
   PayloadTooShortError,
   Bech32DecodeFailure
-} from 'pq-address';
+} from '@project-eleven/pq-address';
 
 // Example params...
 const params = {
