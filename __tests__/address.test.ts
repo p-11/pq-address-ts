@@ -41,6 +41,9 @@ describe('PQ Address roundtrip', () => {
     expect(decoded.pubkeyType).toBe('MlDsa44');
 
     expect(decoded.pubkeyHash).toEqual(hasher.digest(params.pubkeyBytes));
+    expect(decoded.toString()).toEqual(
+      'yp1qpqg39uw700gcctpahe650p9zlzpnjt60cpz09m4kx7ncz8922635hs5cdx7q'
+    );
   });
 
   it('testnet MLDSA44', () => {
@@ -63,5 +66,8 @@ describe('PQ Address roundtrip', () => {
     expect(decoded.pubkeyType).toBe('MlDsa44');
 
     expect(decoded.pubkeyHash).toEqual(hasher.digest(params.pubkeyBytes));
+    expect(decoded.toString()).toEqual(
+      'rh1qpqg39uw700gcctpahe650p9zlzpnjt60cpz09m4kx7ncz8922635hsmmfzpd'
+    );
   });
 });

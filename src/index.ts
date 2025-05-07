@@ -159,12 +159,20 @@ export function decodeAddress(addr: string): DecodedAddress {
     throw new InvalidHashLengthError(hash.length, expected);
   }
 
-  return {
+  const decodedAddress = {
     network,
     version: Version[version],
     pubkeyType: PubKeyType[pubkeyType],
     pubkeyHash: Uint8Array.from(hash)
-  };
+  } as DecodedAddress;
+
+  Object.defineProperty(decodedAddress, 'toString', {
+    value: () => addr,
+    writable: false,
+    enumerable: false
+  });
+
+  return decodedAddress;
 }
 
 // export errors

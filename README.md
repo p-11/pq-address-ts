@@ -147,6 +147,7 @@ try {
   // DECODE
   const decoded = decodeAddress(addr);
   console.log('Decoded:', decoded);
+  console.log('Re-encoded string:', decoded.toString());
 } catch (e: unknown) {
   // Handle encode errors
   if (e instanceof Bech32EncodeFailure) {
