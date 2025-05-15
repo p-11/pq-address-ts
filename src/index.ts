@@ -33,12 +33,16 @@ export function versionFromCode(code: number): Version {
 /** 0x40..=0xFF (192 slots) */
 export enum PubKeyType {
   // eslint-disable-next-line no-unused-vars
-  MlDsa44 = 0x40
+  MlDsa44 = 0x40,
+  // eslint-disable-next-line no-unused-vars
+  SlhDsaSha2S128 = 0x41
 }
 export function pubKeyTypeFromCode(code: number): PubKeyType {
   switch (code) {
     case PubKeyType.MlDsa44:
       return PubKeyType.MlDsa44;
+    case PubKeyType.SlhDsaSha2S128:
+      return PubKeyType.SlhDsaSha2S128;
     default:
       throw new UnknownPubKeyTypeError(code);
   }
@@ -48,6 +52,8 @@ function getPubkeyLength(type: PubKeyType): number {
   switch (type) {
     case PubKeyType.MlDsa44:
       return 1312;
+    case PubKeyType.SlhDsaSha2S128:
+      return 32;
     default:
       throw new UnknownPubKeyTypeError(type);
   }
