@@ -66,8 +66,19 @@ export enum Network {
   // eslint-disable-next-line no-unused-vars
   Testnet = 'testnet'
 }
+
+// SECURITY FIX: Replaced the implicit "anything else is testnet" fallback with an
+// exhaustive switch. Invalid JavaScript or deserialized enum values now fail closed
+// and throw an explicit error instead of silently encoding as testnet.
 export function hrpOf(net: Network): string {
-  return net === Network.Mainnet ? 'yp' : 'rh';
+  switch (net) {
+    case Network.Mainnet:
+      return 'yp';
+    case Network.Testnet:
+      return 'rh';
+    default:
+      throw new UnknownHrpError(String(net));
+  }
 }
 export function networkFromHrp(hrp: string): Network {
   if (hrp === 'yp') return Network.Mainnet;
